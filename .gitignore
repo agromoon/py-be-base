@@ -1,0 +1,9 @@
+.venv
+.env
+.vscode/
+__pycache__/
+build/
+dist/
+wheels/
+*.egg-info/
+*.py[oc]
