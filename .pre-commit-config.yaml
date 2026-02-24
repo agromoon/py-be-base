@@ -1,0 +1,38 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+    - id: check-added-large-files
+    - id: check-case-conflict
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+    - id: check-symlinks
+    - id: destroyed-symlinks
+    - id: check-toml
+    - id: check-yaml
+    # - id: no-commit-to-branch
+      # args: [--branch, main, --branch, master, --branch, develop, --branch, devel]
+  - repo: https://github.com/sirosen/check-jsonschema
+    rev: 0.36.2
+    hooks:
+      - id: check-github-actions
+      - id: check-github-workflows
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.2
+    hooks:
+#      - id: ruff-check
+#        args: [--fix]
+#        pass_filenames: false
+      - id: ruff-format
+        pass_filenames: false
+#  - repo: local
+#    hooks:
+#      - id: mypy-baseline
+#        name: mypy
+#        entry: ./bin/run_mypy.sh
+#        language: script
+#        require_serial: true
+#        types: [python]
+
+default_language_version:
+    python: python3.14
