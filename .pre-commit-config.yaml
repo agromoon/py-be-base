@@ -20,19 +20,17 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.2
     hooks:
-#      - id: ruff-check
-#        args: [--fix]
-#        pass_filenames: false
+      - id: ruff-check
+        args: [--fix]
+        pass_filenames: false
       - id: ruff-format
         pass_filenames: false
-#  - repo: local
-#    hooks:
-#      - id: mypy-baseline
-#        name: mypy
-#        entry: ./bin/run_mypy.sh
-#        language: script
-#        require_serial: true
-#        types: [python]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.19.1
+    hooks:
+      - id: mypy
+        args: [src/]
+        pass_filenames: false
 
 default_language_version:
     python: python3.14
