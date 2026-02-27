@@ -29,6 +29,7 @@ repos:
     rev: v1.19.1
     hooks:
       - id: mypy
+        entry: uv run mypy
         args: [src/]
         pass_filenames: false
 
