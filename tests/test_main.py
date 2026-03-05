@@ -11,9 +11,16 @@ class _UpgradeSpy:
         self.revision = revision
 
 
-def test_main():
+def test_main(monkeypatch):
+    uvicorn_run_called = False
+
+    def fake_run(*args: object, **kwargs: object) -> None:
+        nonlocal uvicorn_run_called
+        uvicorn_run_called = True
+
+    monkeypatch.setattr("baseline.main.uvicorn_run", fake_run)
     main()
-    assert True
+    assert uvicorn_run_called
 
 
 def test_run_migrations_invokes_alembic(monkeypatch):

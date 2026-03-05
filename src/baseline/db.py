@@ -16,11 +16,13 @@ SessionLocal = sessionmaker(
 )
 
 
-@contextmanager
-def get_session() -> Generator[Session]:
-    """Yield a database session bound to the configured engine."""
+def get_db() -> Generator[Session]:
+    """Yield a database session. Use with FastAPI Depends or as context manager."""
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+
+get_session = contextmanager(get_db)

@@ -5,6 +5,11 @@ from pathlib import Path
 
 from alembic import command
 from alembic.config import Config
+from fastapi import FastAPI
+from uvicorn import run as uvicorn_run
+
+from baseline.api import users_router
+from baseline.config import config
 
 
 def get_alembic_config() -> Config:
@@ -20,9 +25,18 @@ def run_migrations() -> None:
     command.upgrade(alembic_cfg, "head")
 
 
+app = FastAPI(title=config.app_name)
+app.include_router(users_router)
+
+
 def main() -> None:
     """Entry point for command-line usage."""
     if len(sys.argv) > 1 and sys.argv[1] == "migrate":
         run_migrations()
     else:
-        print("hey, master")
+        uvicorn_run(
+            "baseline.main:app",
+            host="0.0.0.0",
+            port=8000,
+            reload=config.debug,
+        )
