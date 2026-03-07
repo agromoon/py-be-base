@@ -6,6 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from baseline.api.users import _get_user_service
+from baseline.exceptions import ConflictError, NotFoundError
 from baseline.main import app
 from baseline.schemas.user import UserRead
 
@@ -45,9 +46,10 @@ def test_get_user_200(client, mock_service):
 
 
 def test_get_user_404(client, mock_service):
-    mock_service.get_user.return_value = None
+    mock_service.get_user.side_effect = NotFoundError("User not found")
     r = client.get("/users/999")
     assert r.status_code == 404
+    assert r.json()["detail"] == "Resource not found"
 
 
 def test_create_user_201(client, mock_service):
@@ -57,11 +59,11 @@ def test_create_user_201(client, mock_service):
     assert r.json()["email"] == "alice@x.com" and "password" not in r.json()
 
 
-def test_create_user_400_duplicate(client, mock_service):
-    mock_service.create_user.side_effect = ValueError("email already taken")
+def test_create_user_409_conflict(client, mock_service):
+    mock_service.create_user.side_effect = ConflictError("email already taken")
     r = client.post("/users", json={"name": "alice", "email": "a@b.com", "password": "password123"})
-    assert r.status_code == 400
-    assert "email already taken" in r.json().get("detail", "")
+    assert r.status_code == 409
+    assert r.json()["detail"] == "Conflict with existing resource"
 
 
 def test_update_user_200(client, mock_service):
@@ -72,9 +74,10 @@ def test_update_user_200(client, mock_service):
 
 
 def test_update_user_404(client, mock_service):
-    mock_service.update_user.return_value = None
+    mock_service.update_user.side_effect = NotFoundError("User not found")
     r = client.patch("/users/999", json={"name": "xxx"})
     assert r.status_code == 404
+    assert r.json()["detail"] == "Resource not found"
 
 
 def test_delete_user_204(client, mock_service):
@@ -84,6 +87,7 @@ def test_delete_user_204(client, mock_service):
 
 
 def test_delete_user_404(client, mock_service):
-    mock_service.delete_user.return_value = False
+    mock_service.delete_user.side_effect = NotFoundError("User not found")
     r = client.delete("/users/999")
     assert r.status_code == 404
+    assert r.json()["detail"] == "Resource not found"
