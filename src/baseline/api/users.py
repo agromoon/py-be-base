@@ -1,6 +1,6 @@
 """User REST API."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from baseline.db import get_db
@@ -30,10 +30,7 @@ def get_user(
     service: UserService = Depends(_get_user_service),
 ) -> UserRead:
     """Get a user by id."""
-    user = service.get_user(user_id)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return service.get_user(user_id)
 
 
 @router.post("", response_model=UserRead, status_code=201)
@@ -42,10 +39,7 @@ def create_user(
     service: UserService = Depends(_get_user_service),
 ) -> UserRead:
     """Create a new user."""
-    try:
-        return service.create_user(payload)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+    return service.create_user(payload)
 
 
 @router.patch("/{user_id}", response_model=UserRead)
@@ -55,10 +49,7 @@ def update_user(
     service: UserService = Depends(_get_user_service),
 ) -> UserRead:
     """Update a user by id."""
-    user = service.update_user(user_id, payload)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return service.update_user(user_id, payload)
 
 
 @router.delete("/{user_id}", status_code=204)
@@ -67,5 +58,4 @@ def delete_user(
     service: UserService = Depends(_get_user_service),
 ) -> None:
     """Delete a user by id."""
-    if not service.delete_user(user_id):
-        raise HTTPException(status_code=404, detail="User not found")
+    service.delete_user(user_id)

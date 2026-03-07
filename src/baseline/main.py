@@ -1,15 +1,20 @@
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
 from alembic import command
 from alembic.config import Config
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from uvicorn import run as uvicorn_run
 
 from baseline.api import users_router
 from baseline.config import config
+from baseline.exceptions import AppError
+
+logger = logging.getLogger(__name__)
 
 
 def get_alembic_config() -> Config:
@@ -27,6 +32,16 @@ def run_migrations() -> None:
 
 app = FastAPI(title=config.app_name)
 app.include_router(users_router)
+
+
+@app.exception_handler(AppError)
+def app_error_handler(_request: object, exc: AppError) -> JSONResponse:
+    """Log internal message; return generic detail and stable status code to client."""
+    logger.warning("%s: %s", type(exc).__name__, exc.args[0] if exc.args else exc.detail)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
 
 
 def main() -> None:
