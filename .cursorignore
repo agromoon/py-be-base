@@ -1,4 +1,5 @@
 .env
+.todos
 .venv/
 .vscode/
 __pycache__/

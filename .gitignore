@@ -1,5 +1,6 @@
 .venv
 .env
+.todos
 .vscode/
 __pycache__/
 build/

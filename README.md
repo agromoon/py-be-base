@@ -1,10 +1,3 @@
-# TODO:
-basic crud and endpoints following Arjan example and Corey Schafer series
-add logging
-switch to async everywhere
-add authorization and authentication
-(check the Corey Schafer playlist for next)
-
 ## Baseline python backend project
 
 ### Development
