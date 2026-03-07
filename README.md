@@ -1,65 +1,66 @@
+# TODO:
+basic crud and endpoints following Arjan example and Corey Schafer series
+add logging
+switch to async everywhere
+add authorization and authentication
+(check the Corey Schafer playlist for next)
+
 ## Baseline python backend project
 
-### minimal agents.md instructions:
- - tech stack
- - project structure
- - code style and conventions
- - things should not do
+### Development
 
-### Typical Project Structure
+- **Tests only:** `uv sync --extra test` then `uv run pytest`
+- **Full dev (tests + lint/format/type-check):** `uv sync --all-extras`
+
+### Agents (minimal)
+
+- Tech stack, project structure, code style, things to avoid → see AGENTS.md
+
+### Project structure (standard)
 
 ```
-src/
-├── controllers/    (UserController) handle HTTP requests using Controller pattern for MVC
-├── services/       (UserService) encapsulate business logic, often implementing the Service Layer pattern
-├── repositories/   (IUserRepository interface and UserRepository impl) abstract db operations via the Repository pattern, decoupling data access from business logic
-├── models/         Models or Entities (User class) represent domain objects, aligning with Domain Driven Design
-├── middlewares/    (AuthMiddleware) apply cross-cutting concerns like the Chain of Responsibility pattern
-└── config/
+src/<package>/
+├── api/              HTTP entry: routers, route handlers. Depends on services + schemas.
+├── services/         Business logic; orchestrates repositories and domain rules.
+├── repositories/     Data access; one impl per entity (add protocol/ABC when multiple impls).
+├── models/           ORM entities only (SQLAlchemy). One module per entity.
+├── schemas/          Request/response DTOs (Pydantic). Keeps API contract separate from DB shape.
+├── middleware/       Cross-cutting: auth, logging, error handling (add when needed).
+└── config.py         App settings (or config/ package when split).
 ```
 
-#### 1. Controllers / Handlers (Entry Point)
-This module manages the interface between the web and the application logic.<br>
-*Common Class Names:* UserController, ProductHandler, AuthResolver.<br>
-*Design Patterns:*<br>
-*Proxy:* The controller acts as a proxy, forwarding requests to internal services.<br>
-*Adapter:* Converts incoming HTTP/JSON data into internal Domain Objects or DTOs.<br>
-*Command:* In CQRS (Command Query Responsibility Segregation) architectures, controllers turn requests into "Command" objects.<br>
+- **Naming:** Resource-based. `api/users.py`, `UserService`, `UserRepository`, `User` (model), `UserCreate`/`UserRead`/`UserUpdate` (schemas).
+- **Flow:** api → services → repositories; models for DB, schemas for in/out.
 
-#### 2. Services / Use Cases (Business Logic)
-This is the core of the project where the "rules" of the application live.<br>
-*Common Class Names:* PaymentService, OrderProcessor, EnrollUserUseCase.<br>
-*Design Patterns:*<br>
-*Facade:* Services provide a simple interface to complex underlying logic or multiple repositories.<br>
-*Strategy:* Used when you have multiple ways to perform a task (e.g., PaypalStrategy vs. StripeStrategy).<br>
-*Template Method:* Defines the skeleton of an algorithm (e.g., an export process) while letting subclasses implement specific steps.<br>
+#### 1. api/ (HTTP entry)
+Routers and route handlers; adapt HTTP/JSON to services and schemas.
+- *Names:* `users.py` (router), route fns or `UserController` if you want a facade.
+- *Patterns:* Proxy (forward to services), Adapter (request → DTOs/commands).
 
-#### 3. Repositories / DAOs (Data Access)
-This module abstracts the database technology away from the business logic.<br>
-*Common Class Names:* UserRepository, ProductDao, OrderMapper.<br>
-*Design Patterns:*<br>
-*Repository Pattern:* Mediates between the domain and data mapping layers, acting like an in-memory collection.<br>
-*Data Mapper:* Moves data between objects and a database while keeping them independent.<br>
-*Singleton:* Often used for database connection pools to ensure only one instance exists.<br>
+#### 2. services/ (Business logic)
+Orchestrate repositories and domain rules.
+- *Names:* `UserService`, `OrderProcessor`, `EnrollUserUseCase`.
+- *Patterns:* Facade, Strategy (e.g. payment impls), Template Method.
 
-#### 4. Domain Models / Entities (The "Truth")
-These classes represent the data structures and the logic directly related to them.<br>
-*Common Class Names:* User, Invoice, Transaction.<br>
-*Design Patterns:*<br>
-*Domain Model:* Objects that encapsulate both data and behavior.<br>
-*Data Transfer Object (DTO):* Simple classes used only to move data between layers (no logic).<br>
-*Factory:* Used to instantiate complex entities (e.g., UserFactory.createAdmin()).<br>
+#### 3. repositories/ (Data access)
+Abstract DB access; one impl per entity unless you need multiple (then add protocol/ABC).
+- *Names:* `UserRepository`, `ProductDao`, `OrderMapper`.
+- *Patterns:* Repository, Data Mapper.
 
-#### 5. Middleware / Interceptors (Cross-Cutting Concerns)
-Logic that runs before or after the main processing (logging, auth, error handling).<br>
-*Common Class Names:* AuthGuard, LoggingInterceptor, ErrorHandler.<br>
-*Design Patterns:*<br>
-*Chain of Responsibility:* Requests pass through a "chain" of middleware; each can either process the request or pass it to the next link.<br>
-*Decorator:* Dynamically adds behavior to a function or class without modifying its code.<br>
+#### 4. models/ (ORM entities)
+SQLAlchemy entities only; DB shape. No Pydantic here.
+- *Names:* `User`, `Invoice`, `Transaction`.
+- *Patterns:* Domain model (data + optional behavior).
 
-#### 6. Infrastructure / Clients (External Systems)
-Handles communication with third-party APIs, message brokers, or file systems.<br>
-*Common Class Names:* S3Client, EmailGateway, KafkaProducer.<br>
-*Design Patterns:*<br>
-*Adapter:* Wraps a third-party SDK to match your application's internal interface.<br>
-*Observer:* Used with message brokers (like RabbitMQ) where the system "observes" events and reacts.
+#### 5. schemas/ (DTOs)
+Pydantic request/response; API contract separate from DB.
+- *Names:* `UserCreate`, `UserRead`, `UserUpdate`, `UserBase`.
+- *Patterns:* DTO, validation at boundary.
+
+#### 6. middleware/ (Cross-cutting)
+Auth, logging, error handling. Add when needed.
+- *Names:* `AuthGuard`, `LoggingMiddleware`, `ErrorHandler`.
+- *Patterns:* Chain of Responsibility, Decorator.
+
+#### 7. config
+App settings. Single `config.py` or `config/` package when split.

@@ -3,8 +3,8 @@
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-from baseline.models.user import UserCreate, UserRead, UserUpdate
 from baseline.repositories.user import UserRepository
+from baseline.schemas.user import UserCreate, UserRead, UserUpdate
 
 _password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

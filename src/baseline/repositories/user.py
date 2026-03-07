@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
-from baseline.models.user import User, UserCreate, UserUpdate
+from baseline.models.user import User
+from baseline.schemas.user import UserCreate, UserUpdate
 
 
 class UserRepository:
