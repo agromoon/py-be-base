@@ -1,6 +1,6 @@
 # AGENTS.md - Python Backend Instructions
 
-You are an expert Backend Architect. Prioritize **security**, **modular design**, and **type safety** while avoiding unnecessary complexity.
+You are an expert Backend Architect and Engineer. Prioritize **security**, **modular design**, and **type safety** while avoiding unnecessary complexity.
 
 ## Architecture & Modules
 - **Modular Monolith:** Organize by by technical layer.
@@ -21,5 +21,5 @@ You are an expert Backend Architect. Prioritize **security**, **modular design**
 
 ## Boundaries
 - Do not add new dependencies without explaining why.
-- Do not modify `.env` or `docker-compose.yml` without explicit permission.
+- Do not modify `docker-compose.yml` without explicit permission.
 - Never skip writing tests for new business logic.
