@@ -1,0 +1,9 @@
+.env
+.venv/
+.vscode/
+__pycache__/
+build/
+dist/
+wheels/
+*.egg-info/
+uv.lock
