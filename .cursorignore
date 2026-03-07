@@ -1,10 +1,10 @@
-.venv
 .env
 .todos
+.venv/
 .vscode/
 __pycache__/
 build/
 dist/
 wheels/
 *.egg-info/
-*.py[oc]
+uv.lock
