@@ -4,7 +4,7 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from baseline.exceptions import ConflictError, NotFoundError
-from baseline.repositories.user import UserRepository
+from baseline.repositories.user import UserRepository, UserRepositoryProtocol
 from baseline.schemas.user import UserCreate, UserRead, UserUpdate
 
 _password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -17,9 +17,13 @@ def _hash_password(plain: str) -> str:
 class UserService:
     """Application service for user operations."""
 
-    def __init__(self, db: Session) -> None:
+    def __init__(
+        self,
+        db: Session,
+        repo: UserRepositoryProtocol | None = None,
+    ) -> None:
         self._db = db
-        self._repo = UserRepository()
+        self._repo = repo if repo is not None else UserRepository()
 
     def get_user(self, user_id: int) -> UserRead:
         """Return a user by id. Raises NotFoundError if not found."""

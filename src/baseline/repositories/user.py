@@ -1,7 +1,27 @@
+from typing import Protocol
+
 from sqlalchemy.orm import Session
 
 from baseline.models.user import User
 from baseline.schemas.user import UserCreate, UserUpdate
+
+
+class UserRepositoryProtocol(Protocol):
+    """Protocol for user persistence. Implement for testing or alternate backends."""
+
+    def get_user(self, db: Session, user_id: int) -> User | None: ...
+    def get_user_by_name(self, db: Session, name: str) -> User | None: ...
+    def get_user_by_email(self, db: Session, email: str) -> User | None: ...
+    def get_users(self, db: Session, skip: int = 0, limit: int = 100) -> list[User]: ...
+    def create_user(self, db: Session, user: UserCreate, hashed_password: str) -> User: ...
+    def update_user(
+        self,
+        db: Session,
+        user_id: int,
+        user: UserUpdate,
+        hashed_password: str | None = None,
+    ) -> User | None: ...
+    def delete_user(self, db: Session, user_id: int) -> User | None: ...
 
 
 class UserRepository:
