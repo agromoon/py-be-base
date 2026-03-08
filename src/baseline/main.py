@@ -35,7 +35,7 @@ app.include_router(users_router)
 
 
 @app.exception_handler(AppError)
-def app_error_handler(_request: object, exc: AppError) -> JSONResponse:
+async def app_error_handler(_request: object, exc: AppError) -> JSONResponse:
     """Log internal message; return generic detail and stable status code to client."""
     logger.warning("%s: %s", type(exc).__name__, exc.args[0] if exc.args else exc.detail)
     return JSONResponse(

@@ -1,28 +1,21 @@
-from collections.abc import Generator
-from contextlib import contextmanager
+from collections.abc import AsyncGenerator
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from baseline.config import config
 
-engine = create_engine(config.db_url)
+engine = create_async_engine(config.async_db_url)
 
-SessionLocal = sessionmaker(
+async_session_maker = async_sessionmaker(
     bind=engine,
+    class_=AsyncSession,
     autocommit=False,
     autoflush=False,
     expire_on_commit=False,
 )
 
 
-def get_db() -> Generator[Session]:
-    """Yield a database session. Use with FastAPI Depends or as context manager."""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-get_session = contextmanager(get_db)
+async def get_db() -> AsyncGenerator[AsyncSession]:
+    """Yield an async database session. Use with FastAPI Depends."""
+    async with async_session_maker() as session:
+        yield session

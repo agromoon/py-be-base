@@ -1,6 +1,7 @@
 from typing import Protocol
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from baseline.models.user import User
 from baseline.schemas.user import UserCreate, UserUpdate
@@ -9,37 +10,51 @@ from baseline.schemas.user import UserCreate, UserUpdate
 class UserRepositoryProtocol(Protocol):
     """Protocol for user persistence. Implement for testing or alternate backends."""
 
-    def get_user(self, db: Session, user_id: int) -> User | None: ...
-    def get_user_by_name(self, db: Session, name: str) -> User | None: ...
-    def get_user_by_email(self, db: Session, email: str) -> User | None: ...
-    def get_users(self, db: Session, skip: int = 0, limit: int = 100) -> list[User]: ...
-    def create_user(self, db: Session, user: UserCreate, hashed_password: str) -> User: ...
-    def update_user(
+    async def get_user(self, session: AsyncSession, user_id: int) -> User | None: ...
+    async def get_user_by_name(self, session: AsyncSession, name: str) -> User | None: ...
+    async def get_user_by_email(self, session: AsyncSession, email: str) -> User | None: ...
+    async def get_users(self, session: AsyncSession, skip: int = 0, limit: int = 100) -> list[User]: ...
+    async def create_user(self, session: AsyncSession, user: UserCreate, hashed_password: str) -> User: ...
+    async def update_user(
         self,
-        db: Session,
+        session: AsyncSession,
         user_id: int,
         user: UserUpdate,
         hashed_password: str | None = None,
     ) -> User | None: ...
-    def delete_user(self, db: Session, user_id: int) -> User | None: ...
+    async def delete_user(self, session: AsyncSession, user_id: int) -> User | None: ...
 
 
 class UserRepository:
     """Repository for performing CRUD operations on users."""
 
-    def get_user(self, db: Session, user_id: int) -> User | None:
-        return db.query(User).filter(User.id == user_id).first()
+    async def get_user(self, session: AsyncSession, user_id: int) -> User | None:
+        result = await session.execute(select(User).where(User.id == user_id))
+        return result.scalar_one_or_none()
 
-    def get_user_by_name(self, db: Session, name: str) -> User | None:
-        return db.query(User).filter(User.name == name).first()
+    async def get_user_by_name(self, session: AsyncSession, name: str) -> User | None:
+        result = await session.execute(select(User).where(User.name == name))
+        return result.scalar_one_or_none()
 
-    def get_user_by_email(self, db: Session, email: str) -> User | None:
-        return db.query(User).filter(User.email == email).first()
+    async def get_user_by_email(self, session: AsyncSession, email: str) -> User | None:
+        result = await session.execute(select(User).where(User.email == email))
+        return result.scalar_one_or_none()
 
-    def get_users(self, db: Session, skip: int = 0, limit: int = 100) -> list[User]:
-        return db.query(User).offset(skip).limit(limit).all()
+    async def get_users(
+        self,
+        session: AsyncSession,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> list[User]:
+        result = await session.execute(select(User).offset(skip).limit(limit))
+        return list(result.scalars().all())
 
-    def create_user(self, db: Session, user: UserCreate, hashed_password: str) -> User:
+    async def create_user(
+        self,
+        session: AsyncSession,
+        user: UserCreate,
+        hashed_password: str,
+    ) -> User:
         """Create a new user.
 
         The password must be hashed by the caller before this method is invoked.
@@ -49,14 +64,14 @@ class UserRepository:
             email=user.email,
             hashed_password=hashed_password,
         )
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
+        session.add(db_user)
+        await session.commit()
+        await session.refresh(db_user)
         return db_user
 
-    def update_user(
+    async def update_user(
         self,
-        db: Session,
+        session: AsyncSession,
         user_id: int,
         user: UserUpdate,
         hashed_password: str | None = None,
@@ -66,7 +81,8 @@ class UserRepository:
         If a new password is provided, it must be hashed by the caller and passed
         in via `hashed_password`.
         """
-        db_user = db.query(User).filter(User.id == user_id).first()
+        result = await session.execute(select(User).where(User.id == user_id))
+        db_user = result.scalar_one_or_none()
         if not db_user:
             return None
 
@@ -77,13 +93,14 @@ class UserRepository:
         if user.password is not None and hashed_password is not None:
             db_user.hashed_password = hashed_password
 
-        db.commit()
-        db.refresh(db_user)
+        await session.commit()
+        await session.refresh(db_user)
         return db_user
 
-    def delete_user(self, db: Session, user_id: int) -> User | None:
-        db_user = db.query(User).filter(User.id == user_id).first()
+    async def delete_user(self, session: AsyncSession, user_id: int) -> User | None:
+        result = await session.execute(select(User).where(User.id == user_id))
+        db_user = result.scalar_one_or_none()
         if db_user:
-            db.delete(db_user)
-            db.commit()
+            await session.delete(db_user)
+            await session.commit()
         return db_user
