@@ -1,11 +1,8 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from baseline.db import SessionLocal
+from baseline.db import async_session_maker
 
 
-def test_session_local_creates_session() -> None:
-    session = SessionLocal()
-    try:
-        assert isinstance(session, Session)
-    finally:
-        session.close()
+async def test_async_session_maker_creates_session() -> None:
+    async with async_session_maker() as session:
+        assert isinstance(session, AsyncSession)
