@@ -1,11 +1,16 @@
 ## Baseline python backend project
 
-### Development
+### Commands
 
-- **Tests only:** `uv sync --extra test` then `uv run pytest`
-- **Full dev (tests + lint/format/type-check):** `uv sync --all-extras`
-- **Run locally:** `uv run python -m baseline.main` (app on http://localhost:8000)
-- **Health checks:** `curl -s http://localhost:8000/health` and `curl -s http://localhost:8000/ready`
+- **Sync:** `uv sync` · test deps: `uv sync --extra test` · full dev: `uv sync --all-extras`
+- **Run app:** `uv run python -m baseline.main` → http://localhost:8000
+- **Health:** `curl -s http://localhost:8000/health` · **Ready (DB):** `curl -s http://localhost:8000/ready`
+- **Migrations:** `uv run python -m baseline.main migrate`
+- **Tests:** `uv run pytest` · with coverage: `uv run pytest --cov`
+- **Lint / format / types:** `uv run ruff check .` · `uv run ruff format .` · `uv run mypy src`
+- **Pre-commit:** `uv run pre-commit install` · run all: `uv run pre-commit run --all-files`
+- **Docker:** `docker build -t baseline .` · `docker run -p 8000:8000 baseline`
+- **Docker Compose:** `docker compose up --build` (app + Postgres) · stop: `docker compose down`
 
 ### Agents (minimal)
 
