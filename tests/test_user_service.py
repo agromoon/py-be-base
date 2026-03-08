@@ -22,8 +22,7 @@ def mock_repo():
 
 @pytest.fixture
 def service(mock_repo):
-    with patch("baseline.services.user.UserRepository", return_value=mock_repo):
-        yield UserService(db=MagicMock())
+    return UserService(db=MagicMock(), repo=mock_repo)
 
 
 def test_create_user_success(service, mock_repo):
