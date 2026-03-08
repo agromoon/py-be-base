@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from uvicorn import run as uvicorn_run
 
-from baseline.api import users_router
+from baseline.api import health_router, users_router
 from baseline.config import config
 from baseline.exceptions import AppError
 
@@ -31,6 +31,7 @@ def run_migrations() -> None:
 
 
 app = FastAPI(title=config.app_name)
+app.include_router(health_router)
 app.include_router(users_router)
 
 
