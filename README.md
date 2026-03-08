@@ -4,6 +4,8 @@
 
 - **Tests only:** `uv sync --extra test` then `uv run pytest`
 - **Full dev (tests + lint/format/type-check):** `uv sync --all-extras`
+- **Run locally:** `uv run python -m baseline.main` (app on http://localhost:8000)
+- **Health checks:** `curl -s http://localhost:8000/health` and `curl -s http://localhost:8000/ready`
 
 ### Agents (minimal)
 
